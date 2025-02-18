@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.checkerframework.checker.units.qual.cd;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -22,7 +23,7 @@ public class Main {
             buclePrincipal(sessionFactory);
         } catch (Exception e) {
             System.err.println("Error inesperado al iniciar la aplicación: " + e.getMessage());
-            e.printStackTrace(); 
+            e.printStackTrace();
         }
     }
 
@@ -34,15 +35,15 @@ public class Main {
                 try {
                     opcionesMenu();
                     String respuesta = inputReader.readLine();
-                    if (respuesta == null) { 
+                    if (respuesta == null) {
                         System.out.println("Conexión de entrada cerrada. Saliendo.");
                         break;
                     }
                     procesarOpcion(respuesta, inputReader, sessionFactory, session);
                 } catch (IOException e) {
                     System.err.println("Error de E/S: " + e.getMessage());
-                    return; 
-                } catch (Exception e) { 
+                    return;
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -66,7 +67,7 @@ public class Main {
     }
 
     private static void procesarOpcion(String respuesta, BufferedReader inputReader, SessionFactory sessionFactory,
-            Session session) throws IOException {
+            Session session) throws IOException, Exception {
         switch (respuesta.trim().toLowerCase()) {
             case "a":
                 añadirEntidad(inputReader, sessionFactory);
@@ -92,7 +93,7 @@ public class Main {
         }
     }
 
-    public static void añadirEntidad(BufferedReader input, SessionFactory session) throws IOException {
+    public static void añadirEntidad(BufferedReader input, SessionFactory session) throws IOException, Exception {
         System.out.printf("\n¿Qué entidad quieres agregar?%n" +
                 "a) Companyia%n" +
                 "b) Tren%n" +
@@ -100,31 +101,38 @@ public class Main {
                 "d) Estacio%n");
         String respuesta = input.readLine();
         if (respuesta == null)
-            return; 
+            return;
 
         switch (respuesta.trim().toLowerCase()) {
             case "a":
-                CompanyiaDAO.añadirCompanyia(crearCompanyia(input), session);
+                CompanyiaDAO cdao = new CompanyiaDAO(session);
+                cdao.save(crearCompanyia(input));
+                // CompanyiaDAO.añadirCompanyia(crearCompanyia(input), session);
                 break;
             case "b":
-                TrenDAO.añadirTren(crearTren(input), session);
+                TrenDAO tdao = new TrenDAO(session);
+                tdao.save(crearTren(input));
+                // TrenDAO.añadirTren(crearTren(input), session);
                 break;
             case "c":
-                TrajecteDAO.añadirTrajecte(crearTrajecte(input), session);
+                TrajecteDAO trajdao = new TrajecteDAO(session);
+                trajdao.save(crearTrajecte(input));
                 break;
             case "d":
-                EstacioDAO.añadirEstacio(crearEstacio(input), session);
+                EstacioDAO edao = new EstacioDAO(session);
+                edao.save(crearEstacio(input));
+                // EstacioDAO.añadirEstacio(crearEstacio(input), session);
                 break;
             default:
                 System.out.println("Entidad no válida.");
         }
     }
 
-    public static void buscarEntidad(BufferedReader reader, SessionFactory session) throws IOException {
+    public static void buscarEntidad(BufferedReader reader, SessionFactory session) throws IOException, Exception {
         System.out.print("\n¿Quiere buscar una entidad en específico? (s/n): ");
         String especificoStr = reader.readLine();
         if (especificoStr == null)
-            return; 
+            return;
         boolean especifico = especificoStr.trim().equalsIgnoreCase("s");
 
         int id = -1;
@@ -133,7 +141,7 @@ public class Main {
                 System.out.print("Introduzca el ID de la entidad: ");
                 String idSTR = reader.readLine();
                 if (idSTR == null)
-                    return; 
+                    return;
                 id = Integer.parseInt(idSTR.trim());
             } catch (NumberFormatException e) {
                 System.out.println("ID inválido. Debe ser un número entero.");
@@ -148,32 +156,43 @@ public class Main {
                 "d) Estacio%n");
         String respuesta = reader.readLine();
         if (respuesta == null)
-            return; 
+            return;
 
         switch (respuesta.trim().toLowerCase()) {
             case "a":
+                CompanyiaDAO cdao = new CompanyiaDAO(session);
                 if (especifico)
-                    CompanyiaDAO.consultarCompanyia(id, session);
+                    cdao.get(id);
+                // CompanyiaDAO.consultarCompanyia(id, session);
                 else
-                    CompanyiaDAO.consultarCompanyias(session);
+                    cdao.getAll();
                 break;
             case "b":
+                TrenDAO tdao = new TrenDAO(session);
                 if (especifico)
-                    TrenDAO.consultarTren(id, session);
+                    tdao.get(id);
+                // TrenDAO.consultarTren(id, session);
                 else
-                    TrenDAO.consultarTrenes(session);
+                    tdao.getAll();
+                // TrenDAO.consultarTrenes(session);
                 break;
             case "c":
+                TrajecteDAO trajdao = new TrajecteDAO(session);
                 if (especifico)
-                    TrajecteDAO.consultarTrajecte(id, session);
+                    trajdao.get(id);
+                // TrajecteDAO.consultarTrajecte(id, session);
                 else
-                    TrajecteDAO.consultarTrayectos(session);
+                    trajdao.getAll();
+                // TrajecteDAO.consultarTrayectos(session);
                 break;
             case "d":
+                EstacioDAO edao = new EstacioDAO(session);
                 if (especifico)
-                    EstacioDAO.consultarEstacio(id, session);
+                    edao.get(id);
+                // EstacioDAO.consultarEstacio(id, session);
                 else
-                    EstacioDAO.consultarEstaciones(session);
+                    edao.getAll();
+                // EstacioDAO.consultarEstaciones(session);
                 break;
             default:
                 System.out.println("Entidad no válida.");
@@ -188,20 +207,20 @@ public class Main {
                 "d) Estacio%n");
         String respuesta = reader.readLine();
         if (respuesta == null)
-            return; 
+            return;
 
         switch (respuesta.trim().toLowerCase()) {
             case "a":
-                CompanyiaDAO.contarCompanyias(session);
+                System.out.println("En esta version no se pueden contar las entidades.");
                 break;
             case "b":
-                TrenDAO.contarTrenes(session);
+                System.out.println("En esta version no se pueden contar las entidades.");
                 break;
             case "c":
-                TrajecteDAO.contarTrayectos(session);
+                System.out.println("En esta version no se pueden contar las entidades.");
                 break;
             case "d":
-                EstacioDAO.contarEstaciones(session);
+                System.out.println("En esta version no se pueden contar las entidades.");
                 break;
             default:
                 System.out.println("Entidad no válida.");
@@ -209,10 +228,10 @@ public class Main {
 
     }
 
-    public static void eliminarEntidad(BufferedReader reader, SessionFactory session) throws IOException {
+    public static void eliminarEntidad(BufferedReader reader, SessionFactory session) throws IOException, Exception {
         int id = leerIdEntidad(reader);
         if (id == -1)
-            return; 
+            return;
 
         System.out.printf("\n¿Qué entidad quieres eliminar?%n" +
                 "a) Companyia%n" +
@@ -221,30 +240,38 @@ public class Main {
                 "d) Estacio%n");
         String respuesta = reader.readLine();
         if (respuesta == null)
-            return; 
+            return;
 
         switch (respuesta.trim().toLowerCase()) {
             case "a":
-                CompanyiaDAO.eliminarCompanyia(id, session);
+                CompanyiaDAO cdao = new CompanyiaDAO(session);
+                cdao.delete(cdao.get(id));
+                // CompanyiaDAO.eliminarCompanyia(id, session);
                 break;
             case "b":
-                TrenDAO.eliminarTren(id, session);
+                TrenDAO tdao = new TrenDAO(session);
+                tdao.delete(tdao.get(id));
+                // TrenDAO.eliminarTren(id, session);
                 break;
             case "c":
-                TrajecteDAO.eliminarTrajecte(id, session);
+                TrajecteDAO trajdao = new TrajecteDAO(session);
+                trajdao.delete(trajdao.get(id));
+                // TrajecteDAO.eliminarTrajecte(id, session);
                 break;
             case "d":
-                EstacioDAO.eliminarEstacio(id, session);
+                EstacioDAO edao = new EstacioDAO(session);
+                edao.delete(edao.get(id));
+                // EstacioDAO.eliminarEstacio(id, session);
                 break;
             default:
                 System.out.println("Entidad no válida.");
         }
     }
 
-    public static void actualizarEntidad(BufferedReader reader, SessionFactory session) throws IOException {
+    public static void actualizarEntidad(BufferedReader reader, SessionFactory session) throws IOException, Exception {
         int id = leerIdEntidad(reader);
         if (id == -1)
-            return; 
+            return;
 
         System.out.printf("\n¿Qué entidad quieres editar?%n" +
                 "a) Companyia%n" +
@@ -278,7 +305,7 @@ public class Main {
             System.out.print("Introduzca el ID de la entidad: ");
             String idSTR = reader.readLine();
             if (idSTR == null)
-                return -1; 
+                return -1;
             return Integer.parseInt(idSTR.trim());
         } catch (NumberFormatException e) {
             System.out.println("ID inválido. Debe ser un número entero.");
@@ -286,20 +313,27 @@ public class Main {
         }
     }
 
-    private static void actualizarCompanyia(BufferedReader reader, int id, SessionFactory session) throws IOException {
+    private static void actualizarCompanyia(BufferedReader reader, int id, SessionFactory session)
+            throws IOException, Exception {
         System.out.print("Introduzca el nuevo nombre de la compañía: ");
         String nuevoNombre = reader.readLine();
-        if (nuevoNombre == null)
-            return; 
-        CompanyiaDAO.editarCompanyia(id, nuevoNombre, session);
+        if ((nuevoNombre == null) || (nuevoNombre.isBlank())) {
+            return;
+        }
+        CompanyiaDAO cdao = new CompanyiaDAO(session);
+        Companyia c = cdao.get(id);
+        c.setNameCompanie(nuevoNombre);
+        cdao.update(c);
+        // CompanyiaDAO.editarCompanyia(id, nuevoNombre, session);
     }
 
-    private static void actualizarTren(BufferedReader reader, int id, SessionFactory session) throws IOException {
+    private static void actualizarTren(BufferedReader reader, int id, SessionFactory session)
+            throws IOException, Exception {
         try {
             System.out.print("Introduzca el nuevo nombre del tren: ");
             String nuevoNombre = reader.readLine();
             if (nuevoNombre == null)
-                return; 
+                return;
             if (nuevoNombre.isBlank()) {
                 throw new IllegalArgumentException("El nombre del tren no puede estar en blanco.");
             }
@@ -307,9 +341,15 @@ public class Main {
             System.out.print("Introduzca la nueva capacidad del tren: ");
             String capacidadStr = reader.readLine();
             if (capacidadStr == null)
-                return; 
+                return;
             int nuevaCapacidad = Integer.parseInt(capacidadStr.trim());
-            TrenDAO.editarTren(id, nuevoNombre, session, nuevaCapacidad);
+
+            TrenDAO tdao = new TrenDAO(session);
+            Tren t = tdao.get(id);
+            t.setCapacity(nuevaCapacidad);
+            t.setNameTrain(nuevoNombre);
+            tdao.update(t);
+            // TrenDAO.editarTren(id, nuevoNombre, session, nuevaCapacidad);
 
         } catch (NumberFormatException e) {
             System.out.println("Capacidad inválida. Debe ser un número entero.");
@@ -318,52 +358,63 @@ public class Main {
         }
     }
 
-    private static void actualizarTrajecte(BufferedReader reader, int id, SessionFactory session) throws IOException {
+    private static void actualizarTrajecte(BufferedReader reader, int id, SessionFactory session) throws IOException, Exception {
         try {
             System.out.print("Introduzca el nombre del trayecto: ");
             String nombre = reader.readLine();
             if (nombre == null)
-                return; 
+                return;
             if (nombre.isBlank())
                 throw new IllegalArgumentException("El nombre no puede estar en blanco.");
 
             System.out.print("Introduzca la hora de llegada del trayecto: ");
             String horaLlegada = reader.readLine();
             if (horaLlegada == null)
-                return; 
+                return;
             if (horaLlegada.isBlank())
                 throw new IllegalArgumentException("La hora de llegada no puede estar en blanco.");
 
             System.out.print("Introduzca la hora de salida del trayecto: ");
             String horaSalida = reader.readLine();
             if (horaSalida == null)
-                return; 
+                return;
             if (horaSalida.isBlank())
                 throw new IllegalArgumentException("La hora de salida no puede estar en blanco.");
 
             System.out.print("Introduzca el precio del trayecto: ");
             String precioStr = reader.readLine();
             if (precioStr == null)
-                return; 
+                return;
             int precio = Integer.parseInt(precioStr.trim());
 
-            TrajecteDAO.editarTrajecte(id, nombre, horaLlegada, horaSalida, session, precio);
+            TrajecteDAO trajdao = new TrajecteDAO(session);
+            Trajecte traj = trajdao.get(id);
+            traj.setEntryHourRoute(horaLlegada);
+            traj.setExitHour(horaSalida);
+            traj.setName(nombre);
+            traj.setPrice(precio);
+            trajdao.update(traj);
+            //TrajecteDAO.editarTrajecte(id, nombre, horaLlegada, horaSalida, session, precio);
 
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private static void actualizarEstacio(BufferedReader reader, int id, SessionFactory session) throws IOException {
+    private static void actualizarEstacio(BufferedReader reader, int id, SessionFactory session) throws IOException, Exception {
         System.out.print("Introduzca el nuevo nombre de la estación: ");
         String nombreEst = reader.readLine();
         if (nombreEst == null)
-            return; 
+            return;
         if (nombreEst.isBlank()) {
             System.out.println("El nombre de la estación no puede estar en blanco.");
             return;
         }
-        EstacioDAO.editarEstacio(id, nombreEst, session);
+        EstacioDAO edao = new EstacioDAO(session);
+        Estacio e = edao.get(id);
+        e.setName(nombreEst);
+        edao.update(e);
+        //EstacioDAO.editarEstacio(id, nombreEst, session);
     }
 
     public static Companyia crearCompanyia(BufferedReader reader) throws IOException {
@@ -390,10 +441,10 @@ public class Main {
                 "El nombre del tren no puede estar en blanco.");
         int capacidadTren = leerNumero(reader, "Introduzca la capacidad del Tren: ",
                 "Tienes que introducir un número en la capacidad.");
-        if (capacidadTren != -1) { 
+        if (capacidadTren != -1) {
             return new Tren(nombreTren, capacidadTren);
         }
-        return null; 
+        return null;
     }
 
     public static Tren crearTren(BufferedReader reader) throws IOException {
@@ -402,11 +453,11 @@ public class Main {
         int capacidadTren = leerNumero(reader, "Introduzca la capacidad de su Tren: ",
                 "Tienes que introducir un número en la capacidad.");
         if (capacidadTren == -1)
-            return null; 
+            return null;
 
         Companyia companyia = crearCompanyiaForTren(reader);
         if (companyia == null)
-            return null; 
+            return null;
 
         Tren tren = new Tren(nombreTren, capacidadTren);
         tren.setCompanie(companyia);
@@ -440,7 +491,7 @@ public class Main {
                 "La hora de salida no puede estar en blanco.");
         int precio = leerNumero(reader, "Diga el precio de su trayecto: ", "El precio tiene que ser un número.");
         if (precio == -1)
-            return null; 
+            return null;
 
         return new Trajecte(nombre, precio, horaSalida, horaLlegada);
     }
@@ -454,7 +505,7 @@ public class Main {
                 "La hora de salida no puede estar en blanco.");
         int precio = leerNumero(reader, "Diga el precio de su trayecto: ", "El precio tiene que ser un número.");
         if (precio == -1)
-            return null; 
+            return null;
 
         Trajecte trajecte = new Trajecte(nombre, precio, horaSalida, horaLlegada);
 
@@ -490,7 +541,7 @@ public class Main {
         int capacidadTren = leerNumero(reader, "Introduzca la capacidad del Tren: ",
                 "Tienes que introducir un número en la capacidad.");
         if (capacidadTren != -1) {
-            Companyia companyia = crearCompanyiaForTren(reader); 
+            Companyia companyia = crearCompanyiaForTren(reader);
             if (companyia != null) {
                 Tren tren = new Tren(nombreTren, capacidadTren);
                 tren.setCompanie(companyia);
@@ -536,7 +587,7 @@ public class Main {
         if (precio != -1) {
             return new Trajecte(nombre, precio, horaSalida, horaLlegada);
         }
-        return null; 
+        return null;
     }
 
     private static String leerInputsNoVacios(BufferedReader reader, String prompt, String errorMessage)
@@ -546,7 +597,7 @@ public class Main {
             System.out.print(prompt);
             input = reader.readLine();
             if (input == null)
-                return null; 
+                return null;
             if (input.trim().isBlank()) {
                 System.out.println(errorMessage);
             } else {
@@ -560,7 +611,7 @@ public class Main {
             System.out.print(prompt);
             String inputStr = reader.readLine();
             if (inputStr == null)
-                return -1; 
+                return -1;
             try {
                 return Integer.parseInt(inputStr.trim());
             } catch (NumberFormatException e) {
@@ -574,7 +625,7 @@ public class Main {
             System.out.print(prompt);
             String response = reader.readLine();
             if (response == null)
-                return false; 
+                return false;
             if (response.trim().equalsIgnoreCase("s")) {
                 return true;
             } else if (response.trim().equalsIgnoreCase("n")) {
