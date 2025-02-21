@@ -14,4 +14,6 @@ public interface GenDAO<T> {
     
     void delete(T t) throws Exception;
 
+    int count() throws Exception;
+
 }

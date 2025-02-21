@@ -128,6 +128,24 @@ public abstract class GenDAOImpl<T> implements GenDAO<T> {
     }
 
     @Override
+    public int count() throws Exception {
+        int count = 0;
+
+        try (Session ses = sessionFactory.openSession()) {
+            try {
+                Query<T> q = ses.createQuery("from " + classe.getName(), classe);
+                count = q.list().size();
+            } catch (Exception e) {
+                throw new Exception("Error en obtenir les entitats.", e);
+            }
+        } catch (Exception e) {
+            throw new Exception("Error al gestionar la sessió Hibernate.", e);
+        }
+
+        return count;
+    }
+
+    @Override
     public List<T> getAll() throws Exception {
     List<T> entities = new ArrayList<>();
 

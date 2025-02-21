@@ -162,36 +162,44 @@ public class Main {
             case "a":
                 CompanyiaDAO cdao = new CompanyiaDAO(session);
                 if (especifico)
-                    cdao.get(id);
+                    System.out.println(cdao.get(id));
                 // CompanyiaDAO.consultarCompanyia(id, session);
                 else
-                    cdao.getAll();
+                    for(Companyia c : cdao.getAll()){
+                        System.out.println(c);
+                    }
                 break;
             case "b":
                 TrenDAO tdao = new TrenDAO(session);
                 if (especifico)
-                    tdao.get(id);
+                    System.out.println(tdao.get(id));
                 // TrenDAO.consultarTren(id, session);
                 else
-                    tdao.getAll();
+                    for(Tren t : tdao.getAll()){
+                        System.out.println(t);
+                    }
                 // TrenDAO.consultarTrenes(session);
                 break;
             case "c":
                 TrajecteDAO trajdao = new TrajecteDAO(session);
                 if (especifico)
-                    trajdao.get(id);
+                    System.out.println(trajdao.get(id));
                 // TrajecteDAO.consultarTrajecte(id, session);
                 else
-                    trajdao.getAll();
+                    for(Trajecte t : trajdao.getAll()){
+                        System.out.println(t);
+                    }
                 // TrajecteDAO.consultarTrayectos(session);
                 break;
             case "d":
                 EstacioDAO edao = new EstacioDAO(session);
                 if (especifico)
-                    edao.get(id);
+                System.out.println(edao.get(id));
                 // EstacioDAO.consultarEstacio(id, session);
                 else
-                    edao.getAll();
+                    for(Estacio e : edao.getAll()){
+                        System.out.println(e);
+                    }
                 // EstacioDAO.consultarEstaciones(session);
                 break;
             default:
@@ -199,7 +207,7 @@ public class Main {
         }
     }
 
-    public static void contarEntidades(BufferedReader reader, SessionFactory session) throws IOException {
+    public static void contarEntidades(BufferedReader reader, SessionFactory session) throws IOException, Exception {
         System.out.printf("\n¿Qué entidad quieres saber la cantidad?%n" +
                 "a) Companyia%n" +
                 "b) Tren%n" +
@@ -211,16 +219,24 @@ public class Main {
 
         switch (respuesta.trim().toLowerCase()) {
             case "a":
-                System.out.println("En esta version no se pueden contar las entidades.");
+                CompanyiaDAO cdao = new CompanyiaDAO(session);
+                long companyCount = cdao.count();
+                System.out.println("Hay " + companyCount + (companyCount == 1 ? " compañía." : " compañías."));
                 break;
             case "b":
-                System.out.println("En esta version no se pueden contar las entidades.");
+                TrenDAO tdao = new TrenDAO(session);
+                long trainCount = tdao.count();
+                System.out.println("Hay " + trainCount + (trainCount == 1 ? " tren." : " trenes."));
                 break;
             case "c":
-                System.out.println("En esta version no se pueden contar las entidades.");
+                TrajecteDAO trajdao = new TrajecteDAO(session);
+                long routeCount = trajdao.count();
+                System.out.println("Hay " + routeCount + (routeCount == 1 ? " trayecto." : " trayectos."));
                 break;
             case "d":
-                System.out.println("En esta version no se pueden contar las entidades.");
+                EstacioDAO edao = new EstacioDAO(session);
+                long stationCount = edao.count();
+                System.out.println("Hay " + stationCount + (stationCount == 1 ? " estación." : " estaciones."));
                 break;
             default:
                 System.out.println("Entidad no válida.");
